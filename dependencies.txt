@@ -1,0 +1,4 @@
+#dependencies
+
+
+pip install transformers datasets torch scikit-learn
