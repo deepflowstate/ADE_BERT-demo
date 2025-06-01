@@ -7,7 +7,7 @@ from datasets import Dataset
 from transformers import Trainer, TrainingArguments
 from sklearn.model_selection import KFold
 from sklearn.metrics import f1_score, accuracy_score, precision_score, recall_score
-from model import get_model, get_tokenizer, tokenize_for_classification
+from BERTmodel import get_model, get_tokenizer, tokenize_for_classification
 
 def main():
     df = pd.read_csv("data/binary/full.csv")
