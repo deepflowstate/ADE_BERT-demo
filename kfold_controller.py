@@ -10,7 +10,7 @@ from sklearn.metrics import f1_score, accuracy_score, precision_score, recall_sc
 from BERTmodel import get_model, get_tokenizer, tokenize_for_classification
 
 def main():
-    df = pd.read_csv("data/binary/full.csv")
+    df = pd.read_csv("/data/binary/full.csv")
     texts = df["sentences"].tolist()
     labels =df[["ADR", "WD", "EF", "INF", "SSI", "DI"]].values.tolist()
 
