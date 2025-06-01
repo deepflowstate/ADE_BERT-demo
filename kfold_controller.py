@@ -1,8 +1,13 @@
 import pandas as pd
+import numpy as np
+import json
+import torch
+from torch.nn.functional import sigmoid
 from datasets import Dataset
 from transformers import Trainer, TrainingArguments
 from sklearn.model_selection import KFold
-from model import get_model, get_tokenizer, tokenize_for_classification  # Importa anche la funzione tokenize
+from sklearn.metrics import f1_score, accuracy_score, precision_score, recall_score
+from model import get_model, get_tokenizer, tokenize_for_classification
 
 def main():
     df = pd.read_csv("data/binary/full.csv")
@@ -20,17 +25,17 @@ def main():
         val_texts = [texts[i] for i in val_idx]
         val_labels = [labels[i] for i in val_idx]
 
-        train_dataset = Dataset.from_dict({"text": train_texts, "label": train_labels})
-        val_dataset = Dataset.from_dict({"text": val_texts, "label": val_labels})
+        train_dataset = Dataset.from_dict({"text": train_texts, "labels": train_labels})
+        val_dataset = Dataset.from_dict({"text": val_texts, "labels": val_labels})
 
         
         train_dataset = train_dataset.map(lambda x: tokenize_for_classification(x, tokenizer), batched=True)
         val_dataset = val_dataset.map(lambda x: tokenize_for_classification(x, tokenizer), batched=True)
 
-        train_dataset.set_format(type="torch", columns=["input_ids", "attention_mask", "label"])
-        val_dataset.set_format(type="torch", columns=["input_ids", "attention_mask", "label"])
+        train_dataset.set_format(type="torch", columns=["input_ids", "attention_mask", "labels"])
+        val_dataset.set_format(type="torch", columns=["input_ids", "attention_mask", "labels"])
 
-        model = get_model(num_labels=2)
+        model = get_model(num_labels=6)
 
         training_args = TrainingArguments(
             output_dir=f"./results/fold_{fold + 1}",
@@ -41,15 +46,20 @@ def main():
             num_train_epochs=3,
             weight_decay=0.01,
             save_strategy="epoch",
-            load_best_model_at_end=True,
-            metric_for_best_model="accuracy",
         )
+
 
         def compute_metrics(eval_pred):
             logits, labels = eval_pred
-            preds = logits.argmax(-1)
-            accuracy = (preds == labels).astype(float).mean()
-            return {"accuracy": accuracy}
+            probs = sigmoid(torch.tensor(logits)).numpy()
+            preds = (probs > 0.5).astype(int)
+            
+            return {
+                    "accuracy": accuracy_score(labels, preds), 
+                    "precision_micro": precision_score(labels, preds, average="micro"),
+                    "recall_micro": recall_score(labels, preds, average="micro"),
+                    "f1_micro": f1_score(labels, preds, average="micro")
+                    }
 
         trainer = Trainer(
             model=model,
@@ -60,9 +70,15 @@ def main():
         )
 
         trainer.train()
+        
+        metrics = trainer.evaluate()
+        
+        with open(f"./metrics/fold_{fold + 1}.json", "w") as f:
+            json.dump(metrics, f)
 
-        model.save_pretrained(f"./bert_model_fold_{fold + 1}")
-        tokenizer.save_pretrained(f"./bert_model_fold_{fold + 1}")
+
+        model.save_pretrained(f"./models/bert_model_fold_{fold + 1}")
+        tokenizer.save_pretrained(f"./models/bert_model_fold_{fold + 1}")
 
 if __name__ == "__main__":
     main()
