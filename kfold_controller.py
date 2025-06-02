@@ -17,7 +17,7 @@ def main(data_path = None):
         base_dir = os.path.dirname(__file__)
         data_path = os.path.join(base_dir, 'data', 'binary', 'full.csv')
     
-    df = pd.read_csv(data_path)
+    df = pd.read_csv(data_path, sep='\t')
     # Just for testing we train the model just on 200 examples and not the whole dataset
     df = df.sample(n=200, random_state=42).reset_index(drop=True)
     
@@ -25,7 +25,7 @@ def main(data_path = None):
     labels =df[["ADR", "WD", "EF", "INF", "SSI", "DI"]].values.tolist()
 
     tokenizer = get_tokenizer()
-    kf = KFold(n_splits=1, shuffle=True, random_state=42)
+    kf = KFold(n_splits=2, shuffle=True, random_state=42)
 
     for fold, (train_idx, val_idx) in enumerate(kf.split(texts)):
         print(f"\n--- Fold {fold + 1} ---")
@@ -35,10 +35,9 @@ def main(data_path = None):
         val_texts = [texts[i] for i in val_idx]
         val_labels = [labels[i] for i in val_idx]
 
-        train_dataset = Dataset.from_dict({"text": train_texts, "labels": train_labels})
-        val_dataset = Dataset.from_dict({"text": val_texts, "labels": val_labels})
-
-        
+        train_dataset = Dataset.from_dict({"texts": train_texts, "labels": [list(map(float, lbl)) for lbl in train_labels]})
+        val_dataset = Dataset.from_dict({"texts": val_texts, "labels": [list(map(float, lbl)) for lbl in val_labels]})
+    
         train_dataset = train_dataset.map(lambda x: tokenize_for_classification(x, tokenizer), batched=True)
         val_dataset = val_dataset.map(lambda x: tokenize_for_classification(x, tokenizer), batched=True)
 
@@ -49,7 +48,6 @@ def main(data_path = None):
 
         training_args = TrainingArguments(
             output_dir=f"./results/fold_{fold + 1}",
-            evaluation_strategy="epoch",
             logging_dir=f"./logs/fold_{fold + 1}",
             per_device_train_batch_size=8,
             per_device_eval_batch_size=8,
@@ -61,8 +59,10 @@ def main(data_path = None):
 
         def compute_metrics(eval_pred):
             logits, labels = eval_pred
-            probs = sigmoid(torch.tensor(logits)).numpy()
-            preds = (probs > 0.5).astype(int)
+            probs = sigmoid(torch.tensor(logits))
+            preds = (probs > 0.5).long().cpu().numpy()
+            labels = labels.astype(int)
+
             
             return {
                     "accuracy": accuracy_score(labels, preds), 
