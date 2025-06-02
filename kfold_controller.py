@@ -1,6 +1,7 @@
 import pandas as pd
 import numpy as np
 import json
+import os
 import torch
 from torch.nn.functional import sigmoid
 from datasets import Dataset
@@ -9,13 +10,22 @@ from sklearn.model_selection import KFold
 from sklearn.metrics import f1_score, accuracy_score, precision_score, recall_score
 from BERTmodel import get_model, get_tokenizer, tokenize_for_classification
 
-def main():
-    df = pd.read_csv("demo-repository/data/binary/full.csv")
+
+def main(data_path = None):
+    
+    if data_path is None:
+        base_dir = os.path.dirname(__file__)
+        data_path = os.path.join(base_dir, 'data', 'binary', 'full.csv')
+    
+    df = pd.read_csv(data_path)
+    # Just for testing we train the model just on 200 examples and not the whole dataset
+    df = df.sample(n=200, random_state=42).reset_index(drop=True)
+    
     texts = df["sentences"].tolist()
     labels =df[["ADR", "WD", "EF", "INF", "SSI", "DI"]].values.tolist()
 
     tokenizer = get_tokenizer()
-    kf = KFold(n_splits=5, shuffle=True, random_state=42)
+    kf = KFold(n_splits=1, shuffle=True, random_state=42)
 
     for fold, (train_idx, val_idx) in enumerate(kf.split(texts)):
         print(f"\n--- Fold {fold + 1} ---")
@@ -43,7 +53,7 @@ def main():
             logging_dir=f"./logs/fold_{fold + 1}",
             per_device_train_batch_size=8,
             per_device_eval_batch_size=8,
-            num_train_epochs=3,
+            num_train_epochs=1,
             weight_decay=0.01,
             save_strategy="epoch",
         )
@@ -70,7 +80,7 @@ def main():
         )
 
         trainer.train()
-        
+        print(f"fold {fold+1} completed")        
         metrics = trainer.evaluate()
         
         with open(f"./metrics/fold_{fold + 1}.json", "w") as f:
