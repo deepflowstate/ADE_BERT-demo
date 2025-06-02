@@ -1,6 +1,4 @@
-Here’s a cleaner, more professional, and engaging version of your README file that improves structure, grammar, and clarity while highlighting the key contributions and purpose of the repository:
 
----
 
 # DeepFlowState: Demo Repository for *Understanding Deep Learning*
 
