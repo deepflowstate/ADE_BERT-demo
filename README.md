@@ -14,9 +14,9 @@ The primary goal of this project is to **detect Adverse Drug Reactions (ADR)** i
 
 We fine-tune the pre-trained BERT model on one of the following labeled datasets:
 
-* **ADE Corpus**
-* **IMI WEB-RADR**
-* **PsyTAR**
+* **ADE Corpus**: Data from Medical Case Reports
+* **IMI WEB-RADR**: Data from Twitter posts
+* **PsyTAR**: Data from medical feedback forums
 
 Each of these datasets includes labeled examples of drug-related adverse reactions.
 
