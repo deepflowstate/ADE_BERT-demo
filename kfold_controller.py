@@ -74,13 +74,12 @@ def main(data_path = None):
                 weight_decay=params["weight_decay"],
                 save_strategy="epoch",
                 )
-            
+        
 
             def compute_metrics(eval_pred):
                 logits, labels = eval_pred
                 preds = logits.argmax(axis=1)
                 labels = labels.astype(int)
-
             
                 metrics = {
                         "accuracy": accuracy_score(labels, preds), 
