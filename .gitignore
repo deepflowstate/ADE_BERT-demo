@@ -1,0 +1,6 @@
+psytardataset/*
+!psytardataset/all/
+logs/
+metrics/
+models/
+results/
