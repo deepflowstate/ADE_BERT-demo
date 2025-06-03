@@ -16,4 +16,4 @@ def tokenize_for_classification(examples, tokenizer, max_len=128):
     return tokens
     
 def get_model(num_labels):
-    return BertForSequenceClassification.from_pretrained("bert-base-uncased", num_labels=num_labels, problem_type="multi_label_classification")
+    return BertForSequenceClassification.from_pretrained("bert-base-uncased", num_labels=num_labels)

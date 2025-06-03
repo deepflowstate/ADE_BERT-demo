@@ -2,7 +2,6 @@ import pandas as pd
 import json
 import os
 import torch
-from torch.nn.functional import sigmoid
 from datasets import Dataset
 from transformers import Trainer, TrainingArguments
 from sklearn.model_selection import StratifiedKFold
@@ -14,12 +13,12 @@ def main(data_path = None):
     
     if data_path is None:
         base_dir = os.path.dirname(__file__)
-        data_path = os.path.join(base_dir, 'data_sets', 'ade_corpus_dataset', 'ade_corpus_direct.csv')
+        data_path = os.path.join(base_dir, 'data_sets', 'ade_corpus_dataset', 'ade_corpus_classification.csv')
     
     # load the dataset 
-    df = pd.read_csv(data_path, sep='\t')
+    df = pd.read_csv(data_path)
     # Just for testing we train the model just on 200 examples and not the whole dataset
-    df = df.sample(n=200, random_state=42).reset_index(drop=True)
+    df = df.sample(n=50, random_state=42).reset_index(drop=True)
     
     param_grid = [
     {"learning_rate": 5e-5, "weight_decay": 0.01, "batch_size": 8},
@@ -79,8 +78,7 @@ def main(data_path = None):
 
             def compute_metrics(eval_pred):
                 logits, labels = eval_pred
-                probs = sigmoid(torch.tensor(logits))
-                preds = (probs > 0.5).long().cpu().numpy()
+                preds = logits.argmax(axis=1)
                 labels = labels.astype(int)
 
             
