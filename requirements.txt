@@ -1,0 +1,4 @@
+pandas==2.2.3
+datasets==3.6.0
+transformers[torch]==4.52.4
+scikit-learn==1.6.1
