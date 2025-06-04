@@ -1,4 +1,4 @@
 #dependencies
 
 
-pip install transformers datasets torch scikit-learn
+pip install transformers datasets torch scikit-learn hf_xet
