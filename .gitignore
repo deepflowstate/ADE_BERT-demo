@@ -1,0 +1,7 @@
+psytardataset/*
+!psytardataset/all/
+logs/
+metrics/
+models/
+results/
+__pycache__/
