@@ -14,7 +14,11 @@ def main(data_path = None):
     base_dir = os.path.dirname(__file__)
     #hardcode model path for now...
     pretrained_path = os.path.join(base_dir, "models", "bert_model_fold_2_set_1")
+
+    #use either pretrained model or vanilla BERT
+    #TODO: make this a script param
     model = BertForSequenceClassification.from_pretrained(pretrained_path)
+    #model = BertForSequenceClassification.from_pretrained('bert-base-uncased')
 
     data_path = os.path.join(base_dir, 'data_sets', 'psytar_dataset', 'PsyTAR_dataset.xlsx')
     df = pd.read_excel(data_path, 3)
