@@ -22,11 +22,11 @@ Each of these datasets includes labeled examples of drug-related adverse reactio
 
 ---
 
-## 🔬 Research Focus: Transfer Learning & Generalization
+## 🔬 Novelty & Research Focus: Transfer Learning & Generalization
 
-Our project explores the generalization capability of BERT through **cross-dataset transfer learning**. Here's what we investigate:
+Our project explores the generalization capability of BERT through **cross-dataset transfer learning**. This constitutes the novelty of our approach that we go beyond 'in-domain' training & testing and we train 'in-domain' and test 'out-of-domain' Here's what we investigate:
 
-- Can a BERT model fine-tuned on one dataset effectively detect ADRs in entirely different datasets? (E.g. from a general medicine dataset to a specific psychiatry dataset)
+- Can a BERT model fine-tuned on one dataset effectively detect ADRs in entirely different datasets? (E.g. from a general medicine dataset like ADE Corpus to a specific psychiatry dataset like PsyTAR)
 - How well does it transfer across **platforms, annotation guidelines, and drug vocabularies**?
 
 We compare performance across:
