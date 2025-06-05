@@ -17,8 +17,8 @@ def main(data_path = None):
     
     # load the dataset 
     df = pd.read_csv(data_path)
-    # Just for testing we train the model just on 200 examples and not the whole dataset
-    df = df.sample(n=50, random_state=42).reset_index(drop=True)
+    # Just for testing we train the model just on 5000 examples and not the whole dataset
+    df = df.sample(n=5000, random_state=42).reset_index(drop=True)
     
     param_grid = [
     {"learning_rate": 5e-5, "weight_decay": 0.01, "batch_size": 8},
@@ -37,7 +37,7 @@ def main(data_path = None):
     # Initializing tokenizer
     tokenizer = get_tokenizer()
     # Stratified 5-fold cross-validation 
-    kf = StratifiedKFold(n_splits=2, shuffle=True, random_state=42)
+    kf = StratifiedKFold(n_splits=3, shuffle=True, random_state=42)
     stratify_labels = [lb for lb in labels]
 
     for fold, (train_idx, val_idx) in enumerate(kf.split(texts, stratify_labels)):
