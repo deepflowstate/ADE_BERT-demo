@@ -83,9 +83,9 @@ def main(data_path = None):
             
                 metrics = {
                         "accuracy": accuracy_score(labels, preds), 
-                        "precision_micro": precision_score(labels, preds, average="micro"),
-                        "recall_micro": recall_score(labels, preds, average="micro"),
-                        "f1_micro": f1_score(labels, preds, average="micro")
+                        "precision_micro": precision_score(labels, preds, average="macro"),  #macro for unbalanced classes
+                        "recall_micro": recall_score(labels, preds, average="macro"),
+                        "f1_micro": f1_score(labels, preds, average="macro")
                         }
             
                 report = classification_report(labels, preds, target_names=target_names, output_dict=True) 
