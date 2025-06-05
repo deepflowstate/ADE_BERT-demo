@@ -99,6 +99,7 @@ If you use or reference our work, please cite:
 > Gurulingappa, H., Rajput, A. M., Roberts, A., Fluck, J., Hofmann-Apitius, M., & Toldo, L. (2012). Development of a benchmark corpus to support the automatic extraction of drug-related adverse effects from medical case reports. *Journal of Biomedical Informatics*, 45(5), 885–892.
 
 > Zolnoori, M., et al. (2019). The PsyTAR dataset: From patients generated narratives to a corpus of adverse drug events and effectiveness of psychiatric medications. *Data in Brief*, 24, 103838.
+> Karimi, Sarvnaz; Metke Jimenez, Alejandro; Kemp, Madonna; & Wang, Chen (2015): CADEC. v3. CSIRO. Data Collection. https://doi.org/10.4225/08/570FB102BDAD2
 
 ---
 
