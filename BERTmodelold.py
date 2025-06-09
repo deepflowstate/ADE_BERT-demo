@@ -1,7 +1,6 @@
 #just a first outline how it could look. Please change or delete stuf as you like
-import torch
 from transformers import BertTokenizer, BertForSequenceClassification, Trainer, TrainingArguments
-from datasets import load_dataset, Dataset
+from datasets import Dataset
 from sklearn.model_selection import train_test_split
 import pandas as pd
 

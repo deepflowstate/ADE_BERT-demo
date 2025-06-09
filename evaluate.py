@@ -6,7 +6,7 @@ from datasets import Dataset
 from transformers import BertForSequenceClassification
 from BERTmodel import get_tokenizer, tokenize_for_classification
 from tqdm import tqdm
-from sklearn.metrics import classification_report, f1_score, accuracy_score, precision_score, recall_score
+from sklearn.metrics import f1_score, accuracy_score
 
 
 def main(data_path = None):

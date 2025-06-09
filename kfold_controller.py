@@ -1,7 +1,6 @@
 import pandas as pd
 import json
 import os
-import torch
 from datasets import Dataset
 from transformers import Trainer, TrainingArguments
 from sklearn.model_selection import StratifiedKFold
