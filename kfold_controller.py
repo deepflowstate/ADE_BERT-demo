@@ -17,8 +17,8 @@ def main(data_path = None):
     
     # load the dataset 
     df = pd.read_csv(data_path)
-    # Just for testing we train the model just on 5000 examples and not the whole dataset
-    df = df.sample(n=5000, random_state=42).reset_index(drop=True)
+    # Just for testing we train the model just on 1000 examples and not the whole dataset
+    df = df.sample(n=1000, random_state=42).reset_index(drop=True)
     
     param_grid = [
     {"learning_rate": 5e-5, "weight_decay": 0.01, "batch_size": 8},
