@@ -93,6 +93,28 @@ python kfold_controller.py
 python evaluate.py
 ```
 
+## 4. Install & use development dependencies
+
+Prerequisites: Followed [#Quickstart](#quickstart) to set up the environment.
+
+### Additionally install dev dependencies
+```bash
+pip install -r requirements-dev.txt
+```
+
+### Use ruff
+[Ruff](https://github.com/astral-sh/ruff) is a python linter and code formatter. 
+To run the linter, execute:
+```bash
+ruff check . --fix
+```
+
+To run the code formatter, execute:
+```bash
+ruff format .
+```
+
+
 ---
 
 ## 📚 Citation
