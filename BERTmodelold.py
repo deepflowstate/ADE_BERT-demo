@@ -1,5 +1,10 @@
-#just a first outline how it could look. Please change or delete stuf as you like
-from transformers import BertTokenizer, BertForSequenceClassification, Trainer, TrainingArguments
+# just a first outline how it could look. Please change or delete stuf as you like
+from transformers import (
+    BertTokenizer,
+    BertForSequenceClassification,
+    Trainer,
+    TrainingArguments,
+)
 from datasets import Dataset
 from sklearn.model_selection import train_test_split
 import pandas as pd
@@ -15,11 +20,17 @@ train_texts, val_texts, train_labels, val_labels = train_test_split(
 # 3. Tokenization
 tokenizer = BertTokenizer.from_pretrained("bert-base-uncased")
 
+
 def tokenize_function(examples):
     return tokenizer(examples["text"], padding="max_length", truncation=True)
 
-train_dataset = Dataset.from_dict({"text": train_texts, "label": train_labels}).map(tokenize_function, batched=True)
-val_dataset = Dataset.from_dict({"text": val_texts, "label": val_labels}).map(tokenize_function, batched=True)
+
+train_dataset = Dataset.from_dict({"text": train_texts, "label": train_labels}).map(
+    tokenize_function, batched=True
+)
+val_dataset = Dataset.from_dict({"text": val_texts, "label": val_labels}).map(
+    tokenize_function, batched=True
+)
 
 # 4. Load BERT model
 model = BertForSequenceClassification.from_pretrained("bert-base-uncased", num_labels=2)
