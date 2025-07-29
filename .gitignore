@@ -5,5 +5,5 @@ metrics/
 models/
 results/
 __pycache__/
-
+.testenv/
 .venv

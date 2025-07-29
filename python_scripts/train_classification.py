@@ -75,7 +75,7 @@ def main(data_path=None):
         for i, params in enumerate(param_grid):
             print(f"Fold {fold + 1}, Set {i + 1} - Params: {params}")
 
-            model = get_model(num_labels=2)
+            model = get_model(num_labels=2, model_type="classification")
 
             training_args = TrainingArguments(
                 output_dir=f"./results/fold_{fold + 1}/set_{i + 1}",
