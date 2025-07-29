@@ -42,13 +42,17 @@ This allows us to evaluate how well the model captures the *underlying concept* 
 
 This repository includes:
 
+'python_scripts/':
 - `BERTmodel.py`: The pretrained model BERT and specifications (working file)
 - `BERTmodelold.py`: Old version of the model. We plan to rework this (old version)
-- `data_sets/`: The datasets we use for training and testing
 - `kfold_controller.py`: Training the BERT model using 3-fold cross-validation
 - `evaluate.py`: File to test the finetuned BERT model (currently on PsyTAR)
+`data_sets/`: The datasets we use for training and testing
+'jupyter_notebooks/':
 - `ade_param_comparison.ipynb`: Visualisation and plots of results
+  
 - `requirements.txt`: required versions of packages and programs that need to be installed to run this repo
+- 'requirements-dev.txt': requirded verions of packages and programs for developers
 - `dependencies.txt`: File where we want to collect dependencies (is currently not in use)
 - `.gitignore`: File to indicate github what should be ignored
 - `README.md`: The file you are currently reading
@@ -84,7 +88,7 @@ pip install -r requirements.txt
 ### 4. Train the Model
 
 ```bash
-python kfold_controller.py
+python kfold_controller_ADE_Corpus.py
 ```
 
 ### 5. Test the Model
@@ -136,6 +140,5 @@ If you use or reference our work, please cite:
 
 This project is licensed under the MIT License. See the [LICENSE](LICENSE) file for details.
 
-```
 
 
