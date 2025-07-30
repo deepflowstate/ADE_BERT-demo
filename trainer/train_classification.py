@@ -50,7 +50,7 @@ def main(dataset_name="psytar_classification"):
     }
 
     if dataset_name not in dataset_map:
-        raise ValueError(f"Dataset {dataset_name} non supportato. Scegli tra {list(dataset_map.keys())}")
+        raise ValueError(f"Dataset {dataset_name} not supported. Choose from {list(dataset_map.keys())}")
 
     data_info = dataset_map[dataset_name]
     df = pd.read_csv(data_info["path"])
@@ -142,12 +142,12 @@ def main(dataset_name="psytar_classification"):
 
 
 if __name__ == "__main__":
-    print(">>> Inizio test del training su 'ade_classification'...")
+    print(">>> Start of training test on 'ade_classification'...")
 
     try:
         main("ade_classification")
-        print(">>> Training completato correttamente ✅")
+        print(">>> Training was completed correctly")
     except Exception as e:
-        print(">>> Errore durante il training ❌")
+        print(">>> Error during training")
         print(e)
 
