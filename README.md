@@ -14,9 +14,7 @@ The primary goal of this project is to **detect Adverse Drug Reactions (ADR)** i
 We fine-tune and test the pre-trained BERT model on the following labeled datasets:
 
 - **ADE Corpus**: Data from general Medical Case Reports (general medicine)
-- **IMI WEB-RADR**: Data from Twitter posts (general medicine)
 - **PsyTAR**: Data from medical feedback forums (specific to psychiatry)
-- **CADEC**: Data from medical feedback forums (general medicine)
 
 Each of these datasets includes labeled examples of drug-related adverse reactions.
 
@@ -29,12 +27,12 @@ Our project explores the generalization capability of BERT through **cross-datas
 - Can a BERT model fine-tuned on one dataset effectively detect ADRs in entirely different datasets? (E.g. from a general medicine dataset like ADE Corpus to a specific psychiatry dataset like PsyTAR)
 - How well does it transfer across **platforms, annotation guidelines, and drug vocabularies**?
 
-We compare performance across:
+We compare performance across different datasets:
 
-- A **training dataset** from one dataset (ADE Corpus) used for training (in-domain)
-- And **an external test dataset** (PsyTAR) (out-of-domain)
+- A **training dataset** from one dataset (ADE Corpus or PsyTAR) used for training (in-domain)
+- And **an external test dataset** (ADE Corpus or PsyTAR) (out-of-domain)
 
-This allows us to evaluate how well the model captures the *underlying concept* of ADR, independent of dataset-specific biases. We plan to train and test with all datasets crosswise.
+This allows us to evaluate how well the model captures the *underlying concept* of ADR, independent of dataset-specific biases.
 
 ---
 
