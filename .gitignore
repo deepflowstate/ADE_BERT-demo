@@ -6,4 +6,5 @@ models/
 results/
 __pycache__/
 .testenv/
+0.26.0
 .venv
