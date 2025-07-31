@@ -65,17 +65,23 @@ def main():
             "target_names": ["not-related", "related"],
         },
         "psytar_classification": {
-            "path": os.path.join(base_dir, "..", "data_sets", "psytar_dataset", "psytar_classification.csv"),
+            "path": os.path.join(base_dir, "..", "data_sets", "psytar_dataset", "PsyTAR_dataset.xlsx"),
             "target_names": ["not-related", "related"],
         },
     }
 
     data_info = dataset_map[dataset_name]
-    df = pd.read_csv(data_info["path"])
+    if args.dataset == 'psytar':
+        df = pd.read_excel(data_info["path"], 3)
+        texts = [ str(x) for x in df["sentences"].tolist()]
+        labels = [1 if x==1.0 else 0 for x in df["ADR"].tolist()]
+    else:
+        df = pd.read_csv(data_info["path"])
+        texts = df["text"].tolist()
+        labels = df["label"].tolist()
     df = df.sample(n=args.numsamples, random_state=42).reset_index(drop=True)
 
-    texts = df["text"].tolist()
-    labels = df["label"].tolist()
+    
     target_names = data_info["target_names"]
 
     if args.dataset == "psytar":
