@@ -17,26 +17,26 @@ from preprocessing.preprocess_psytar import get_tokenizer as get_tokenizer_psyta
 from model_selection.models_factory import get_model
 from preprocessing.tokenizer_utils import tokenize_for_model
 
-# def compute_metrics(eval_pred, target_names):
-#     logits, labels = eval_pred
-#     preds = logits.argmax(axis=1)
-#     labels = labels.astype(int)
+def compute_metrics(eval_pred, target_names):
+    logits, labels = eval_pred
+    preds = logits.argmax(axis=1)
+    labels = labels.astype(int)
 
-#     metrics = {
-#         "accuracy": accuracy_score(labels, preds),
-#         "precision_macro": precision_score(labels, preds, average="macro"),
-#         "recall_macro": recall_score(labels, preds, average="macro"),
-#         "f1_macro": f1_score(labels, preds, average="macro"),
-#     }
+    metrics = {
+        "accuracy": accuracy_score(labels, preds),
+        "precision_macro": precision_score(labels, preds, average="macro"),
+        "recall_macro": recall_score(labels, preds, average="macro"),
+        "f1_macro": f1_score(labels, preds, average="macro"),
+    }
 
-#     report = classification_report(labels, preds, target_names=target_names, output_dict=True)
-#     for label in target_names:
-#         metrics[f"{label}_support"] = report[label]["support"]
-#         metrics[f"{label}_precision"] = report[label]["precision"]
-#         metrics[f"{label}_recall"] = report[label]["recall"]
-#         metrics[f"{label}_f1-score"] = report[label]["f1-score"]
+    report = classification_report(labels, preds, target_names=target_names, output_dict=True)
+    for label in target_names:
+        metrics[f"{label}_support"] = report[label]["support"]
+        metrics[f"{label}_precision"] = report[label]["precision"]
+        metrics[f"{label}_recall"] = report[label]["recall"]
+        metrics[f"{label}_f1-score"] = report[label]["f1-score"]
 
-#     return metrics
+    return metrics
 
 def main():
     parser = argparse.ArgumentParser(description="Train a fine-tuned BERT on ADR datasets.")
@@ -44,7 +44,7 @@ def main():
     parser.add_argument("numsamples", type=int, default=250)
     args = parser.parse_args()
 
-    print(f">>> Start of training on '{args.dataset}'...")
+    print(f">>> Start of training on '{args.dataset}' with {args.numsamples} samples...")
 
     if args.dataset == 'psytar' and args.numsamples > 6010:
         print(f"Error: Psytar dataset only has 6010 samples.")
@@ -141,11 +141,11 @@ def main():
             )
 
             trainer.train()
-            # metrics = trainer.evaluate()
+            metrics = trainer.evaluate()
 
-            # os.makedirs("./metrics_classification", exist_ok=True)
-            # with open(f"./metrics_classification/fold_{fold}_set_{i}.json", "w") as f:
-            #     json.dump(metrics, f)
+            os.makedirs("./metrics_classification", exist_ok=True)
+            with open(f"./metrics_classification/fold_{fold}_set_{i}.json", "w") as f:
+                json.dump(metrics, f)
 
 
             os.makedirs("./models_classification", exist_ok=True)
@@ -153,22 +153,22 @@ def main():
             tokenizer.save_pretrained(f"./models_classification/{dataset_name}/bert_model_fold_{fold}_set_{i}")
             print(f">>> Saved /models_classification/{dataset_name}/bert_model_fold_{fold}_set_{i}")
 
-            # all_results.append(
-            #     {
-            #         "fold": fold,
-            #         "param_set": i,
-            #         "learning_rate": params["learning_rate"],
-            #         "weight_decay": params["weight_decay"],
-            #         "batch_size": params["batch_size"],
-            #         **metrics,
-            #     }
-            # )
+            all_results.append(
+                {
+                    "fold": fold,
+                    "param_set": i,
+                    "learning_rate": params["learning_rate"],
+                    "weight_decay": params["weight_decay"],
+                    "batch_size": params["batch_size"],
+                    **metrics,
+                }
+            )
 
-    # with open("./metrics_classification/all_results.json", "w") as f:
-    #     json.dump(all_results, f, indent=4)
+    with open("./metrics_classification/all_results.json", "w") as f:
+        json.dump(all_results, f, indent=4)
 
-    # df_results = pd.DataFrame(all_results)
-    # df_results.to_csv("./metrics_classification/all_results.csv", index=False)
+    df_results = pd.DataFrame(all_results)
+    df_results.to_csv("./metrics_classification/all_results.csv", index=False)
 
 
 if __name__ == "__main__":

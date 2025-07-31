@@ -1,6 +1,7 @@
 import os
 import sys
 import json
+import argparse
 import pandas as pd
 from datasets import Dataset
 from transformers import Trainer
@@ -11,7 +12,8 @@ base_dir = os.path.dirname(os.path.abspath(__file__))
 parent_dir = os.path.abspath(os.path.join(base_dir, ".."))
 sys.path.insert(0, parent_dir)
 
-from preprocessing.preprocess_ade import get_tokenizer
+from preprocessing.preprocess_ade import get_tokenizer as get_tokenizer_ade
+from preprocessing.preprocess_psytar import get_tokenizer as get_tokenizer_psytar
 from model_selection.models_factory import get_model
 from preprocessing.tokenizer_utils import tokenize_for_model
 
@@ -39,14 +41,18 @@ def evaluate_model(model_dir, dataset_path, target_names):
     """Evaluate a single saved model on a dataset"""
     print(f"Evaluating {model_dir} on {os.path.basename(dataset_path)}")
 
-    # Load model and tokenizer
-    tokenizer = get_tokenizer(model_type="classification").from_pretrained(model_dir)
+    # Load model
     model = get_model(num_labels=len(target_names), model_type="classification").from_pretrained(model_dir)
 
-    # Load dataset
-    df = pd.read_csv(dataset_path)
-    texts = df["text"].tolist()
-    labels = df["label"].tolist()
+    # Load tokenizer and dataset
+    if 'psytar' in dataset_path:
+        df = pd.read_excel(dataset_path, 3)
+        texts = [ str(x) for x in df["sentences"].tolist()]
+        labels = [1 if x==1.0 else 0 for x in df["ADR"].tolist()]
+    else:
+        df = pd.read_csv(dataset_path)
+        texts = df["text"].tolist()
+        labels = df["label"].tolist()
 
     eval_dataset = Dataset.from_dict({"text": texts, "label": labels})
     eval_dataset = eval_dataset.map(lambda x: tokenize_for_model(x, tokenizer), batched=True)
@@ -59,7 +65,15 @@ def evaluate_model(model_dir, dataset_path, target_names):
     
     return metrics
 
-if __name__ == "__main__":
+def main():
+    parser = argparse.ArgumentParser(description="Evaluate a model on a dataset.")
+    parser.add_argument("model", choices=["psytar", "ade"], default = "ade", help="Trained model type to evaluate") 
+    parser.add_argument("dataset", choices=["psytar", "ade"], default = "ade", help="Dataset to evaluate on")
+    parser.add_argument("--model_path", help="Absolute path to model. Use if you want to test a single specific model")
+    args = parser.parse_args()
+
+    print(f">>> Evaluate on {args.dataset}")
+
     # Define datasets
     dataset_map = {
         "ade_classification": {
@@ -67,15 +81,16 @@ if __name__ == "__main__":
             "target_names": ["not-related", "related"],
         },
         "psytar_classification": {
-            "path": os.path.join(parent_dir, "data_sets", "psytar_dataset", "psytar_classification.csv"),
+            "path": os.path.join(parent_dir, "data_sets", "psytar_dataset", "PsyTAR_dataset.xlsx"),
             "target_names": ["not-related", "related"],
         },
     }
 
-    model_root = "./models"
+    model_root = f"./models/{args.model}"
     results = []
+    model_dirs = [args.model_path] if args.model_path else sorted(os.listdir(model_root))
 
-    for model_dir in sorted(os.listdir(model_root)):
+    for model_dir in model_dirs:
         full_model_path = os.path.join(model_root, model_dir)
         if not os.path.isdir(full_model_path):
             continue
@@ -97,3 +112,7 @@ if __name__ == "__main__":
     df_results = pd.DataFrame(results)
     df_results.to_csv("./eval_metrics/all_eval_results.csv", index=False)
     print("Evaluation completed. Combined results saved to ./eval_metrics/all_eval_results.csv")
+
+
+if __name__ == "__main__":
+    main()
