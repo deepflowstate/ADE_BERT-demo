@@ -76,9 +76,9 @@ def main():
 
     print(f">>> Evaluate on {args.dataset}")
     if args.dataset == "psytar":
-        dataset = "psytar_classification"
+        dataset_name = "psytar_classification"
     else:
-        dataset = "ade_classification"
+        dataset_name = "ade_classification"
 
     # Define datasets
     dataset_map = {
