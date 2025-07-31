@@ -43,30 +43,31 @@ This approach helps us assess whether the model captures the **core ADR concept*
 
 ---
 
-## 📁 Repository Contents
+## 📁 Repository Structure
 
-This repository includes:
-trainer/ # Scripts for fine-tuning BERT
-├─ train_ner.py # 3-fold CV for NER
-└─ train_classification.py # 3-fold CV for classification
+```text
+trainer/                     # Scripts for fine-tuning BERT
+├─ train_ner.py              # 3-fold CV for NER
+└─ train_classification.py   # 3-fold CV for classification
 
-evaluation/ # Evaluation scripts
+evaluation/                  # Evaluation scripts
 ├─ evaluate_classification.py
 └─ evaluate_ner.py
 
-data_sets/ # Datasets for training and testing
+data_sets/                   # Datasets for training and testing
 
-jupyter_notebooks/ # Visualization & results
+jupyter_notebooks/           # Visualization & results
 └─ ade_param_comparison.ipynb
 
 utils/
 preprocessing/
 model_selection/
 
-requirements.txt # Runtime dependencies
-requirements-dev.txt # Dev dependencies
+requirements.txt             # Runtime dependencies
+requirements-dev.txt         # Dev dependencies
+dependencies.txt             # (Currently unused)
 .gitignore
-README.md # This file
+README.md                    # This file
 
 ---
 
