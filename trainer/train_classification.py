@@ -40,8 +40,8 @@ def compute_metrics(eval_pred, target_names):
 
 def main():
     parser = argparse.ArgumentParser(description="Train a fine-tuned BERT on ADR datasets.")
-    parser.add_argument("dataset", choices=["psytar", "ade"], default = "ade", help="Dataset to train on")
-    parser.add_argument("numsamples", type=int, default=250)
+    parser.add_argument("--dataset", choices=["psytar", "ade"], default = "ade", help="Dataset to train on")
+    parser.add_argument("--numsamples", type=int, default=250)
     args = parser.parse_args()
 
     print(f">>> Start of training on '{args.dataset}' with {args.numsamples} samples...")
@@ -145,12 +145,12 @@ def main():
             trainer.train()
             metrics = trainer.evaluate()
 
-            os.makedirs("./metrics_classification", exist_ok=True)
-            with open(f"./metrics_classification/fold_{fold}_set_{i}.json", "w") as f:
+            os.makedirs(f"./metrics_classification/{dataset_name}", exist_ok=True)
+            with open(f"./metrics_classification/{dataset_name}/fold_{fold}_set_{i}.json", "w") as f:
                 json.dump(metrics, f)
 
 
-            os.makedirs("./models_classification", exist_ok=True)
+            os.makedirs(f"./models_classification/{dataset_name}", exist_ok=True)
             model.save_pretrained(f"./models_classification/{dataset_name}/bert_model_fold_{fold}_set_{i}")
             tokenizer.save_pretrained(f"./models_classification/{dataset_name}/bert_model_fold_{fold}_set_{i}")
             print(f">>> Saved /models_classification/{dataset_name}/bert_model_fold_{fold}_set_{i}")
@@ -166,11 +166,11 @@ def main():
                 }
             )
 
-    with open("./metrics_classification/all_results.json", "w") as f:
+    with open("./metrics_classification/{dataset_name}/all_results.json", "w") as f:
         json.dump(all_results, f, indent=4)
 
     df_results = pd.DataFrame(all_results)
-    df_results.to_csv("./metrics_classification/all_results.csv", index=False)
+    df_results.to_csv("./metrics_classification/{dataset_name}/all_results.csv", index=False)
 
 
 if __name__ == "__main__":

@@ -23,9 +23,9 @@ def compute_metrics(eval_pred, target_names):
 
     metrics = {
         "accuracy": accuracy_score(labels, preds),
-        "precision_macro": precision_score(labels, preds, average="macro"),
-        "recall_macro": recall_score(labels, preds, average="macro"),
-        "f1_macro": f1_score(labels, preds, average="macro"),
+        "precision_micro": precision_score(labels, preds, average="micro"),
+        "recall_micro": recall_score(labels, preds, average="micro"),
+        "f1_micro": f1_score(labels, preds, average="micro"),
     }
 
     report = classification_report(labels, preds, target_names=target_names, output_dict=True)
@@ -48,11 +48,14 @@ def evaluate_model(model_dir, dataset_path, target_names):
     if 'psytar' in dataset_path:
         tokenizer = get_tokenizer_psytar(model_type="classification").from_pretrained(model_dir)
         df = pd.read_excel(dataset_path, 3)
+        #just take 1000 samples to evaluate
+        df = df.sample(n=1000, random_state=42).reset_index(drop=True)
         texts = [ str(x) for x in df["sentences"].tolist()]
         labels = [1 if x==1.0 else 0 for x in df["ADR"].tolist()]
     else:
         tokenizer = get_tokenizer_ade(model_type="classification").from_pretrained(model_dir)
         df = pd.read_csv(dataset_path)
+        df = df.sample(n=1000, random_state=42).reset_index(drop=True)
         texts = df["text"].tolist()
         labels = df["label"].tolist()
 
