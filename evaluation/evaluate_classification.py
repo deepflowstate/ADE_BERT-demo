@@ -99,6 +99,8 @@ def main():
     results = []
     model_dirs = [args.model_path] if args.model_path else sorted(os.listdir(model_root))
 
+    os.makedirs("./eval_metrics", exist_ok=True)
+    
     for model_dir in model_dirs:
         full_model_path = os.path.join(model_root, model_dir)
         if not os.path.isdir(full_model_path):
@@ -113,7 +115,7 @@ def main():
         results.append(metrics)
 
         # Save per-model-per-dataset metrics
-        os.makedirs("./eval_metrics", exist_ok=True)
+    
         with open(f"./eval_metrics/{model_dir}_{dataset_name}_eval.json", "w") as f:
             json.dump(metrics, f, indent=4)
 
