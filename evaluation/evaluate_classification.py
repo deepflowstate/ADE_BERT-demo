@@ -101,7 +101,7 @@ def main():
         if not os.path.isdir(full_model_path):
             continue
 
-        info = dataset_map[dataset]
+        info = dataset_map[dataset_name]
         metrics = evaluate_model(full_model_path, info["path"], info["target_names"])
         metrics.update({
             "model": model_dir,
