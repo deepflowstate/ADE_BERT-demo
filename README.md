@@ -91,16 +91,19 @@ pip install -r requirements.txt
 ### 4.1. Train the Classification Model
 
 ```bash
+## Format: train_classification.py --dataset [choices: ade, psytar] --numsamples [int]
 cd trainer
-python train_classification.py
+python train_classification.py --dataset ade --numsamples 100
 ```
 
 ### 4.2. Test the Classification Model
 
 ```bash
+## Format: evaluate_classification.py --model [choices: ade, psytar] --dataset [choices: ade, psytar]
+## optional: --model_path absolute_path_to_model
 cd ..
 cd evaluation
-python evaluate_classification.py
+python evaluate_classification.py --model ade --dataset psytar
 ```
 
 ### 5.1 Train the NER Model
