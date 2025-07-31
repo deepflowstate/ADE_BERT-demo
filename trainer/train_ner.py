@@ -119,13 +119,13 @@ def main(dataset_name="ade_ner"):
             trainer.train()
             metrics = trainer.evaluate()
 
-            os.makedirs("./metrics", exist_ok=True)
-            with open(f"./metrics/fold_{fold + 1}_set_{i + 1}.json", "w") as f:
+            os.makedirs("./metrics_ner", exist_ok=True)
+            with open(f"./metrics_ner/fold_{fold + 1}_set_{i + 1}.json", "w") as f:
                 json.dump(metrics, f)
 
-            os.makedirs("./models", exist_ok=True)
-            model.save_pretrained(f"./models/fold_{fold + 1}_set_{i + 1}")
-            trainer.tokenizer.save_pretrained(f"./models/fold_{fold + 1}_set_{i + 1}")
+            os.makedirs("./models_ner", exist_ok=True)
+            model.save_pretrained(f"./models_ner/fold_{fold + 1}_set_{i + 1}")
+            trainer.tokenizer.save_pretrained(f"./models_ner/fold_{fold + 1}_set_{i + 1}")
 
             all_results.append(
                 {
@@ -138,11 +138,11 @@ def main(dataset_name="ade_ner"):
                 }
             )
 
-    with open("./metrics/all_results.json", "w") as f:
+    with open("./metrics_ner/all_results.json", "w") as f:
         json.dump(all_results, f, indent=4)
 
     df_results = pd.DataFrame(all_results)
-    df_results.to_csv("./metrics/all_results.csv", index=False)
+    df_results.to_csv("./metrics_ner/all_results.csv", index=False)
 
 if __name__ == "__main__":
     main()
