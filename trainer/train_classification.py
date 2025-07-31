@@ -16,8 +16,19 @@ from model_selection.models_factory import get_model
 from preprocessing.tokenizer_utils import tokenize_for_model
 
 def compute_metrics(eval_pred, target_names):
+    """
+    Compute accuracy and macro-averaged precision, recall, F1,
+    along with per-class metrics from predictions.
+
+    Args:
+        eval_pred: Tuple (logits, labels)
+        target_names: Class label names for per-class reporting
+
+    Returns:
+        Dictionary of metrics
+    """
     logits, labels = eval_pred
-    preds = logits.argmax(axis=1)
+    preds = logits.argmax(axis=1)  # Convert logits to predicted labels
     labels = labels.astype(int)
 
     metrics = {
@@ -27,6 +38,7 @@ def compute_metrics(eval_pred, target_names):
         "f1_macro": f1_score(labels, preds, average="macro"),
     }
 
+    # Add per-class scores to the metrics dict
     report = classification_report(labels, preds, target_names=target_names, output_dict=True)
     for label in target_names:
         metrics[f"{label}_support"] = report[label]["support"]
@@ -36,8 +48,20 @@ def compute_metrics(eval_pred, target_names):
 
     return metrics
 
-def main(dataset_name="psytar_classification"):
 
+def main(dataset_name="psytar_classification"):
+    """
+    Runs 3-fold cross-validation training for text classification.
+
+    - Loads the dataset
+    - Tokenizes the text
+    - Trains models using various hyperparameters
+    - Saves model outputs and metrics
+
+    Args:
+        dataset_name (str): Choose either "ade_classification" or "psytar_classification"
+    """
+    # Map dataset names to file paths and label names
     dataset_map = {
         "ade_classification": {
             "path": os.path.join(base_dir, "..", "data_sets", "ade_corpus_dataset", "ade_corpus_classification.csv"),
@@ -50,41 +74,46 @@ def main(dataset_name="psytar_classification"):
     }
 
     if dataset_name not in dataset_map:
-        raise ValueError(f"Dataset {dataset_name} non supportato. Scegli tra {list(dataset_map.keys())}")
+        raise ValueError(f"Unsupported dataset: {dataset_name}")
 
+    # Load dataset
     data_info = dataset_map[dataset_name]
     df = pd.read_csv(data_info["path"])
-    df = df.sample(n=300, random_state=42).reset_index(drop=True)
 
     texts = df["text"].tolist()
     labels = df["label"].tolist()
     target_names = data_info["target_names"]
 
-    tokenizer = get_tokenizer(model_type="classification")
+    tokenizer = get_tokenizer(model_type="classification")  # Load tokenizer
 
+    # Grid of hyperparameter combinations to test
     param_grid = [
         {"learning_rate": 5e-5, "weight_decay": 0.01, "batch_size": 8},
         {"learning_rate": 3e-5, "weight_decay": 0.01, "batch_size": 16},
         {"learning_rate": 2e-5, "weight_decay": 0.0, "batch_size": 8},
     ]
 
-    kf = StratifiedKFold(n_splits=2, shuffle=True, random_state=42)
+    kf = StratifiedKFold(n_splits=3, shuffle=True, random_state=42)  # 3-fold cross-validation
     all_results = []
 
     for fold, (train_idx, val_idx) in enumerate(kf.split(texts, labels), start=1):
         print(f"\n--- Fold {fold} ---")
 
+        # Split data into training and validation sets
         train_texts = [texts[i] for i in train_idx]
         train_labels = [labels[i] for i in train_idx]
         val_texts = [texts[i] for i in val_idx]
         val_labels = [labels[i] for i in val_idx]
 
+        # Convert to HuggingFace Datasets
         train_dataset = Dataset.from_dict({"text": train_texts, "label": train_labels})
         val_dataset = Dataset.from_dict({"text": val_texts, "label": val_labels})
 
+        # Tokenize both sets
         train_dataset = train_dataset.map(lambda x: tokenize_for_model(x, tokenizer), batched=True)
         val_dataset = val_dataset.map(lambda x: tokenize_for_model(x, tokenizer), batched=True)
 
+        # Set format to PyTorch tensors
         train_dataset.set_format(type="torch", columns=["input_ids", "attention_mask", "label"])
         val_dataset.set_format(type="torch", columns=["input_ids", "attention_mask", "label"])
 
@@ -93,6 +122,7 @@ def main(dataset_name="psytar_classification"):
 
             model = get_model(num_labels=len(target_names), model_type="classification")
 
+            # Define training configuration
             training_args = TrainingArguments(
                 output_dir=f"./results/fold_{fold}/set_{i}",
                 logging_dir=f"./logs/fold_{fold}/set_{i}",
@@ -104,6 +134,7 @@ def main(dataset_name="psytar_classification"):
                 save_strategy="epoch",
             )
 
+            # Set up HuggingFace Trainer
             trainer = Trainer(
                 model=model,
                 args=training_args,
@@ -115,14 +146,17 @@ def main(dataset_name="psytar_classification"):
             trainer.train()
             metrics = trainer.evaluate()
 
+            # Save metrics
             os.makedirs("./metrics", exist_ok=True)
             with open(f"./metrics/fold_{fold}_set_{i}.json", "w") as f:
                 json.dump(metrics, f)
 
+            # Save model and tokenizer
             os.makedirs("./models", exist_ok=True)
             model.save_pretrained(f"./models/bert_model_fold_{fold}_set_{i}")
             tokenizer.save_pretrained(f"./models/bert_model_fold_{fold}_set_{i}")
 
+            # Track all results for final report
             all_results.append(
                 {
                     "fold": fold,
@@ -134,6 +168,7 @@ def main(dataset_name="psytar_classification"):
                 }
             )
 
+    # Save all results to JSON and CSV
     with open("./metrics/all_results.json", "w") as f:
         json.dump(all_results, f, indent=4)
 
@@ -142,12 +177,12 @@ def main(dataset_name="psytar_classification"):
 
 
 if __name__ == "__main__":
-    print(">>> Inizio test del training su 'ade_classification'...")
+    print(">>> Starting training for classification on ADE_corpus...")
 
     try:
         main("ade_classification")
-        print(">>> Training completato correttamente ✅")
+        print(">>> Training correctly completed ✅")
     except Exception as e:
-        print(">>> Errore durante il training ❌")
+        print(">>> An error occurred during the training ❌")
         print(e)
 
