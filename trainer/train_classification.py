@@ -115,13 +115,13 @@ def main(dataset_name="psytar_classification"):
             trainer.train()
             metrics = trainer.evaluate()
 
-            os.makedirs("./metrics", exist_ok=True)
-            with open(f"./metrics/fold_{fold}_set_{i}.json", "w") as f:
+            os.makedirs("./metrics_classification", exist_ok=True)
+            with open(f"./metrics_classification/fold_{fold}_set_{i}.json", "w") as f:
                 json.dump(metrics, f)
 
-            os.makedirs("./models", exist_ok=True)
-            model.save_pretrained(f"./models/bert_model_fold_{fold}_set_{i}")
-            tokenizer.save_pretrained(f"./models/bert_model_fold_{fold}_set_{i}")
+            os.makedirs("./models_classification", exist_ok=True)
+            model.save_pretrained(f"./models_classification/bert_model_fold_{fold}_set_{i}")
+            tokenizer.save_pretrained(f"./models_classification/bert_model_fold_{fold}_set_{i}")
 
             all_results.append(
                 {
@@ -134,11 +134,11 @@ def main(dataset_name="psytar_classification"):
                 }
             )
 
-    with open("./metrics/all_results.json", "w") as f:
+    with open("./metrics_classification/all_results.json", "w") as f:
         json.dump(all_results, f, indent=4)
 
     df_results = pd.DataFrame(all_results)
-    df_results.to_csv("./metrics/all_results.csv", index=False)
+    df_results.to_csv("./metrics_classification/all_results.csv", index=False)
 
 
 if __name__ == "__main__":
