@@ -46,10 +46,12 @@ def evaluate_model(model_dir, dataset_path, target_names):
 
     # Load tokenizer and dataset
     if 'psytar' in dataset_path:
+        tokenizer = get_tokenizer_psytar(model_type="classification").from_pretrained(model_dir)
         df = pd.read_excel(dataset_path, 3)
         texts = [ str(x) for x in df["sentences"].tolist()]
         labels = [1 if x==1.0 else 0 for x in df["ADR"].tolist()]
     else:
+        tokenizer = get_tokenizer_ade(model_type="classification").from_pretrained(model_dir)
         df = pd.read_csv(dataset_path)
         texts = df["text"].tolist()
         labels = df["label"].tolist()
@@ -73,6 +75,10 @@ def main():
     args = parser.parse_args()
 
     print(f">>> Evaluate on {args.dataset}")
+    if args.dataset == "psytar":
+        dataset = "psytar_classification"
+    else:
+        dataset = "ade_classification"
 
     # Define datasets
     dataset_map = {
@@ -86,7 +92,7 @@ def main():
         },
     }
 
-    model_root = f"./models/{args.model}"
+    model_root = f"./models_classification/{args.model}_classification"
     results = []
     model_dirs = [args.model_path] if args.model_path else sorted(os.listdir(model_root))
 
@@ -95,18 +101,18 @@ def main():
         if not os.path.isdir(full_model_path):
             continue
 
-        for dataset_name, info in dataset_map.items():
-            metrics = evaluate_model(full_model_path, info["path"], info["target_names"])
-            metrics.update({
-                "model": model_dir,
-                "dataset": dataset_name,
-            })
-            results.append(metrics)
+        info = dataset_map[dataset]
+        metrics = evaluate_model(full_model_path, info["path"], info["target_names"])
+        metrics.update({
+            "model": model_dir,
+            "dataset": dataset_name,
+        })
+        results.append(metrics)
 
-            # Save per-model-per-dataset metrics
-            os.makedirs("./eval_metrics", exist_ok=True)
-            with open(f"./eval_metrics/{model_dir}_{dataset_name}_eval.json", "w") as f:
-                json.dump(metrics, f, indent=4)
+        # Save per-model-per-dataset metrics
+        os.makedirs("./eval_metrics", exist_ok=True)
+        with open(f"./eval_metrics/{model_dir}_{dataset_name}_eval.json", "w") as f:
+            json.dump(metrics, f, indent=4)
 
     # Save combined results
     df_results = pd.DataFrame(results)

@@ -73,13 +73,15 @@ def main():
     data_info = dataset_map[dataset_name]
     if args.dataset == 'psytar':
         df = pd.read_excel(data_info["path"], 3)
+        df = df.sample(n=args.numsamples, random_state=42).reset_index(drop=True)
         texts = [ str(x) for x in df["sentences"].tolist()]
         labels = [1 if x==1.0 else 0 for x in df["ADR"].tolist()]
     else:
         df = pd.read_csv(data_info["path"])
+        df = df.sample(n=args.numsamples, random_state=42).reset_index(drop=True)
         texts = df["text"].tolist()
         labels = df["label"].tolist()
-    df = df.sample(n=args.numsamples, random_state=42).reset_index(drop=True)
+
 
     
     target_names = data_info["target_names"]
