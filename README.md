@@ -107,7 +107,7 @@ cd trainer
 python train_ner.py
 ```
 
-### 5.2. Test the Classification Model
+### 5.2. Test the NER Model
 
 ```bash
 cd ..
