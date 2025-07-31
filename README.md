@@ -9,7 +9,7 @@ This repository showcases a practical application of deep learning using **BERT*
 
 ## 🧠 Project Overview
 
-The primary goal of this project is to **detect Adverse Drug Reactions (ADR)** in text using a fine-tuned BERT model. ADR detection is a key part of pharmacovigilance—the ongoing monitoring of drug safety in real-world usage. It is important to detect adverse reactions to medicine as early as possible. Tools that can be used for this early detection are NLP methods applied on posts on social media and medical feedback forums.
+The primary goals of this project are to **detect Adverse Drug Reactions (ADR)** (classification task) and to **identify drugs and their effects** (Named Entity Recognition task) in text using a fine-tuned BERT model. ADR detection is a key part of pharmacovigilance—the ongoing monitoring of drug safety in real-world usage. It is important to detect adverse reactions to medicine as early as possible. Tools that can be used for this early detection are NLP methods applied on posts on social media and medical feedback forums.
 
 We fine-tune and test the pre-trained BERT model on the following labeled datasets:
 
@@ -75,6 +75,8 @@ We recommend using a virtual environment:
 ```bash
 python -m venv .venv
 source .venv/bin/activate  # On Windows: .venv\Scripts\activate
+cd..
+cd..
 ```
 
 ### 3. Install Dependencies
@@ -83,19 +85,37 @@ source .venv/bin/activate  # On Windows: .venv\Scripts\activate
 pip install -r requirements.txt
 ```
 
-### 4. Train the Model
+### 4.1. Train the Classification Model
 
 ```bash
-python kfold_controller_ADE_Corpus.py
+cd trainer
+python train_classification.py
 ```
 
-### 5. Test the Model
+### 4.2. Test the Classification Model
 
 ```bash
-python evaluate.py
+cd ..
+cd evaluation
+python evaluate_classification.py
 ```
 
-## 4. Install & use development dependencies
+### 5.1 Train the NER Model
+
+```bash
+cd trainer
+python train_ner.py
+```
+
+### 5.2. Test the Classification Model
+
+```bash
+cd ..
+cd evaluation
+python evaluate_ner.py
+```
+
+## 6. Install & use development dependencies
 
 Prerequisites: Followed [#Quickstart](#quickstart) to set up the environment.
 
