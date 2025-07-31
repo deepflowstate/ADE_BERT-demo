@@ -100,10 +100,12 @@ python train_classification.py --dataset ade --numsamples 100
 
 ```bash
 ## Format: evaluate_classification.py --model [choices: ade, psytar] --dataset [choices: ade, psytar]
-## optional: --model_path absolute_path_to_model
+## optional: --model_path relative_path_to_model
 cd ..
 cd evaluation
 python evaluate_classification.py --model ade --dataset psytar
+# Or just evaluate on selected model:
+python evaluate_classification.py --model ade --dataset psytar --model_path "bert_model_fold_1_set_2"
 ```
 
 ### 5.1 Train the NER Model
