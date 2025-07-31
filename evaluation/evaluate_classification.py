@@ -69,8 +69,8 @@ def evaluate_model(model_dir, dataset_path, target_names):
 
 def main():
     parser = argparse.ArgumentParser(description="Evaluate a model on a dataset.")
-    parser.add_argument("model", choices=["psytar", "ade"], default = "ade", help="Trained model type to evaluate") 
-    parser.add_argument("dataset", choices=["psytar", "ade"], default = "ade", help="Dataset to evaluate on")
+    parser.add_argument("--model", choices=["psytar", "ade"], default = "ade", help="Trained model type to evaluate") 
+    parser.add_argument("--dataset", choices=["psytar", "ade"], default = "ade", help="Dataset to evaluate on")
     parser.add_argument("--model_path", help="Absolute path to model. Use if you want to test a single specific model")
     args = parser.parse_args()
 
