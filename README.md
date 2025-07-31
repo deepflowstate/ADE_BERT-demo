@@ -65,7 +65,6 @@ model_selection/
 
 requirements.txt             # Runtime dependencies
 requirements-dev.txt         # Dev dependencies
-dependencies.txt             # (Currently unused)
 .gitignore
 README.md                    # This file
 ````
