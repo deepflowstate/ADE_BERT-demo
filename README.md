@@ -9,54 +9,64 @@ This repository showcases a practical application of deep learning using **BERT*
 
 ## 🧠 Project Overview
 
-The primary goals of this project are to **detect Adverse Drug Reactions (ADR)** (classification task) and to **identify drugs and their effects** (Named Entity Recognition task) in text using a fine-tuned BERT model. ADR detection is a key part of pharmacovigilance—the ongoing monitoring of drug safety in real-world usage. It is important to detect adverse reactions to medicine as early as possible. Tools that can be used for this early detection are NLP methods applied on posts on social media and medical feedback forums.
+The primary goals of this project are:
 
-We fine-tune and test the pre-trained BERT model on the following labeled datasets:
+- **Adverse Drug Reaction (ADR) detection** – classification task  
+- **Drug and effect identification** – Named Entity Recognition (NER) task  
 
-- **ADE Corpus**: Data from general Medical Case Reports (general medicine)
-- **PsyTAR**: Data from medical feedback forums (specific to psychiatry)
+ADR detection is a key part of **pharmacovigilance**—the ongoing monitoring of drug safety in real-world usage. Detecting adverse reactions early is crucial, and **NLP methods** applied to **social media posts** and **medical feedback forums** are valuable tools for this task.
 
-Each of these datasets includes labeled examples of drug-related adverse reactions.
+We fine-tune and test the pre-trained **BERT** model on the following labeled datasets:
+
+- **ADE Corpus** – General medical case reports  
+- **PsyTAR** – Medical feedback forums (psychiatry-focused)  
+
+Each dataset contains **labeled drug-related adverse reactions**.
 
 ---
 
 ## 🔬 Novelty & Research Focus: Transfer Learning & Generalization
 
-Our project explores the generalization capability of BERT through **cross-dataset transfer learning**. This constitutes the novelty of our approach that we go beyond 'in-domain' training & testing and we train 'in-domain' and test 'out-of-domain' Here's what we investigate:
+This project examines BERT’s **cross-dataset generalization** via **transfer learning**, moving beyond simple in-domain evaluations.  
 
-- Can a BERT model fine-tuned on one dataset effectively detect ADRs in entirely different datasets? (E.g. from a general medicine dataset like ADE Corpus to a specific psychiatry dataset like PsyTAR)
-- How well does it transfer across **platforms, annotation guidelines, and drug vocabularies**?
+Key research questions:
 
-We compare performance across different datasets:
+- Can a model fine-tuned on one dataset detect ADRs in a completely different dataset?  
+- How well does it **transfer across platforms, annotation guidelines, and drug vocabularies**?  
 
-- A **training dataset** from one dataset (ADE Corpus or PsyTAR) used for training (in-domain)
-- And **an external test dataset** (ADE Corpus or PsyTAR) (out-of-domain)
+We evaluate:
 
-This allows us to evaluate how well the model captures the *underlying concept* of ADR, independent of dataset-specific biases.
+- **In-domain**: Model trained and tested on the same dataset  
+- **Out-of-domain**: Model trained on one dataset and tested on the other  
+
+This approach helps us assess whether the model captures the **core ADR concept** beyond dataset-specific patterns.
 
 ---
 
 ## 📁 Repository Contents
 
 This repository includes:
+trainer/ # Scripts for fine-tuning BERT
+├─ train_ner.py # 3-fold CV for NER
+└─ train_classification.py # 3-fold CV for classification
 
-- trainer/: Scripts for finetuning the BERT models
-- `train_ner.py`: Finetuning the BERT model using 3-fold cross-validation on NER task
-- `train_classification.py`: Finetuning the BERT model using 3-fold cross-validation on Classification task
-- evaluation/: Scripts to evaluate the finetuned model
-- `evaluate_classification.py`: File to test the finetuned BERT model on classification task
-- `evaluate_ner.py`: File to test the finetuned BERT model on NER task
-- data_sets/: The datasets we use for training and testing
-- jupyter_notebooks/: jupyter notebooks to visualize and plot results
-- `ade_param_comparison.ipynb`: Visualisation and plots of results of ADE corpus
-- utils/
-- preprocessing/
-- model_selection/
-- `requirements.txt`: required versions of packages and programs that need to be installed to run this repo
-- `requirements-dev.txt`: requirded verions of packages and programs for developers
-- `dependencies.txt`: File where we want to collect dependencies (is currently not in use)
-- `.gitignore`: File to indicate github what should be ignored
-- `README.md`: The file you are currently reading
+evaluation/ # Evaluation scripts
+├─ evaluate_classification.py
+└─ evaluate_ner.py
+
+data_sets/ # Datasets for training and testing
+
+jupyter_notebooks/ # Visualization & results
+└─ ade_param_comparison.ipynb
+
+utils/
+preprocessing/
+model_selection/
+
+requirements.txt # Runtime dependencies
+requirements-dev.txt # Dev dependencies
+.gitignore
+README.md # This file
 
 ---
 
@@ -101,8 +111,7 @@ python train_classification.py --dataset ade --numsamples 100
 ```bash
 ## Format: evaluate_classification.py --model [choices: ade, psytar] --dataset [choices: ade, psytar]
 ## optional: --model_path relative_path_to_model
-cd ..
-cd evaluation
+cd ../evaluation
 python evaluate_classification.py --model ade --dataset psytar
 # Or just evaluate on selected model:
 python evaluate_classification.py --model ade --dataset psytar --model_path "bert_model_fold_1_set_2"
@@ -118,8 +127,7 @@ python train_ner.py
 ### 5.2. Test the NER Model
 
 ```bash
-cd ..
-cd evaluation
+cd ../evaluation
 python evaluate_ner.py
 ```
 
