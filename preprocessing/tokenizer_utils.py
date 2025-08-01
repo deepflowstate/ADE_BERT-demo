@@ -96,6 +96,22 @@ def tokenize_for_model(examples: dict, tokenizer, model_type="classification", m
 
 
 def create_labels(text, drug_span, effect_span, tokens, offsets):
+    """
+    Assigns BIO labels to tokens based on character spans for DRUG and EFFECT entities.
+
+    Parameters:
+    - text (str): The full input text.
+    - drug_span (tuple): (start, end) character indices of the DRUG entity.
+    - effect_span (tuple): (start, end) character indices of the EFFECT entity.
+    - tokens (List[str]): List of tokens from the text.
+    - offsets (List[Tuple[int, int]]): Character offsets for each token.
+
+    Returns:
+    - List[int]: List of label IDs mapped from BIO tags.
+
+    Note:
+    Requires a global `label_map` for BIO tag to ID mapping.
+    """
     labels = ["O"] * len(tokens)
 
     def mark_span(start_char, end_char, b_label, i_label):
