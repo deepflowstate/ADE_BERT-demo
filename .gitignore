@@ -3,6 +3,10 @@ psytardataset/*
 logs/
 metrics/
 models/
+models_ner/
+models_classification/
+metrics_ner/
+metrics_classification/
 results/
 __pycache__/
 .testenv/

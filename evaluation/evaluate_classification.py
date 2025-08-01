@@ -1,0 +1,129 @@
+import os
+import sys
+import json
+import argparse
+import pandas as pd
+from datasets import Dataset
+from transformers import Trainer
+from sklearn.metrics import classification_report, accuracy_score, f1_score, precision_score, recall_score
+
+# Add parent directory to path
+base_dir = os.path.dirname(os.path.abspath(__file__))
+parent_dir = os.path.abspath(os.path.join(base_dir, ".."))
+sys.path.insert(0, parent_dir)
+
+from preprocessing.preprocess_ade import get_tokenizer as get_tokenizer_ade
+from preprocessing.preprocess_psytar import get_tokenizer as get_tokenizer_psytar
+from model_selection.models_factory import get_model
+from preprocessing.tokenizer_utils import tokenize_for_model
+
+def compute_metrics(eval_pred, target_names):
+    logits, labels = eval_pred
+    preds = logits.argmax(axis=1)
+
+    metrics = {
+        "accuracy": accuracy_score(labels, preds),
+        "precision_micro": precision_score(labels, preds, average="micro"),
+        "recall_micro": recall_score(labels, preds, average="micro"),
+        "f1_micro": f1_score(labels, preds, average="micro"),
+    }
+
+    report = classification_report(labels, preds, target_names=target_names, output_dict=True)
+    for label in target_names:
+        metrics[f"{label}_support"] = report[label]["support"]
+        metrics[f"{label}_precision"] = report[label]["precision"]
+        metrics[f"{label}_recall"] = report[label]["recall"]
+        metrics[f"{label}_f1-score"] = report[label]["f1-score"]
+
+    return metrics
+
+def evaluate_model(model_dir, dataset_path, target_names):
+    """Evaluate a single saved model on a dataset"""
+    print(f"Evaluating {model_dir} on {os.path.basename(dataset_path)}")
+
+    # Load model
+    model = get_model(num_labels=len(target_names), model_type="classification").from_pretrained(model_dir)
+
+    # Load tokenizer and dataset
+    if 'psytar' in dataset_path:
+        tokenizer = get_tokenizer_psytar(model_type="classification").from_pretrained(model_dir)
+        df = pd.read_excel(dataset_path, 3)
+        #just take 1000 samples to evaluate
+        df = df.sample(n=1000, random_state=42).reset_index(drop=True)
+        texts = [ str(x) for x in df["sentences"].tolist()]
+        labels = [1 if x==1.0 else 0 for x in df["ADR"].tolist()]
+    else:
+        tokenizer = get_tokenizer_ade(model_type="classification").from_pretrained(model_dir)
+        df = pd.read_csv(dataset_path)
+        df = df.sample(n=1000, random_state=42).reset_index(drop=True)
+        texts = df["text"].tolist()
+        labels = df["label"].tolist()
+
+    eval_dataset = Dataset.from_dict({"text": texts, "label": labels})
+    eval_dataset = eval_dataset.map(lambda x: tokenize_for_model(x, tokenizer), batched=True)
+    eval_dataset.set_format(type="torch", columns=["input_ids", "attention_mask", "label"])
+
+    # Evaluate
+    trainer = Trainer(model=model)
+    preds_output = trainer.predict(eval_dataset)
+    metrics = compute_metrics((preds_output.predictions, preds_output.label_ids), target_names)
+    
+    return metrics
+
+def main():
+    parser = argparse.ArgumentParser(description="Evaluate a model on a dataset.")
+    parser.add_argument("--model", choices=["psytar", "ade"], default = "ade", help="Trained model type to evaluate") 
+    parser.add_argument("--dataset", choices=["psytar", "ade"], default = "ade", help="Dataset to evaluate on")
+    parser.add_argument("--model_path", help="Absolute path to model. Use if you want to test a single specific model")
+    args = parser.parse_args()
+
+    print(f">>> Evaluate on {args.dataset}")
+    if args.dataset == "psytar":
+        dataset_name = "psytar_classification"
+    else:
+        dataset_name = "ade_classification"
+
+    # Define datasets
+    dataset_map = {
+        "ade_classification": {
+            "path": os.path.join(parent_dir, "data_sets", "ade_corpus_dataset", "ade_corpus_classification.csv"),
+            "target_names": ["not-related", "related"],
+        },
+        "psytar_classification": {
+            "path": os.path.join(parent_dir, "data_sets", "psytar_dataset", "PsyTAR_dataset.xlsx"),
+            "target_names": ["not-related", "related"],
+        },
+    }
+
+    model_root = f"./models_classification/{args.model}_classification"
+    results = []
+    model_dirs = [args.model_path] if args.model_path else sorted(os.listdir(model_root))
+
+    os.makedirs("./eval_metrics", exist_ok=True)
+    
+    for model_dir in model_dirs:
+        full_model_path = os.path.join(model_root, model_dir)
+        if not os.path.isdir(full_model_path):
+            continue
+
+        info = dataset_map[dataset_name]
+        metrics = evaluate_model(full_model_path, info["path"], info["target_names"])
+        metrics.update({
+            "model": model_dir,
+            "dataset": dataset_name,
+        })
+        results.append(metrics)
+
+        # Save per-model-per-dataset metrics
+    
+        with open(f"./eval_metrics/{model_dir}_{dataset_name}_eval.json", "w") as f:
+            json.dump(metrics, f, indent=4)
+
+    # Save combined results
+    df_results = pd.DataFrame(results)
+    df_results.to_csv("./eval_metrics/all_eval_results.csv", index=False)
+    print("Evaluation completed. Combined results saved to ./eval_metrics/all_eval_results.csv")
+
+
+if __name__ == "__main__":
+    main()

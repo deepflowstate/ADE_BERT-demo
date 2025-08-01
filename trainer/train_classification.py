@@ -1,6 +1,7 @@
 import sys
 import os
 import json
+import argparse
 import pandas as pd
 from datasets import Dataset
 from transformers import Trainer, TrainingArguments
@@ -11,7 +12,8 @@ base_dir = os.path.dirname(os.path.abspath(__file__))
 parent_dir = os.path.abspath(os.path.join(base_dir, ".."))
 sys.path.insert(0, parent_dir)
 
-from preprocessing.preprocess_ade import get_tokenizer
+from preprocessing.preprocess_ade import get_tokenizer as get_tokenizer_ade
+from preprocessing.preprocess_psytar import get_tokenizer as get_tokenizer_psytar
 from model_selection.models_factory import get_model
 from preprocessing.tokenizer_utils import tokenize_for_model
 
@@ -48,8 +50,7 @@ def compute_metrics(eval_pred, target_names):
 
     return metrics
 
-
-def main(dataset_name="psytar_classification"):
+def main():
     """
     Runs 3-fold cross-validation training for text classification.
 
@@ -61,32 +62,59 @@ def main(dataset_name="psytar_classification"):
     Args:
         dataset_name (str): Choose either "ade_classification" or "psytar_classification"
     """
-    # Map dataset names to file paths and label names
+    parser = argparse.ArgumentParser(description="Train a fine-tuned BERT on ADR datasets.")
+    parser.add_argument("--dataset", choices=["psytar", "ade"], default = "ade", help="Dataset to train on")
+    parser.add_argument("--numsamples", type=int, default=250)
+    args = parser.parse_args()
+
+    print(f">>> Start of training on '{args.dataset}' with {args.numsamples} samples...")
+
+    if args.dataset == 'psytar' and args.numsamples > 6010:
+        print(f"Error: Psytar dataset only has 6010 samples.")
+        sys.exit(1)
+    elif args.dataset == 'ade' and args.numsamples > 23517:
+        print(f"Error: ADE dataset only has 23517 samples.")
+        sys.exit(1)
+
+    if args.dataset == "psytar":
+        dataset_name = "psytar_classification"
+    else:
+        dataset_name = "ade_classification"
+        
+
     dataset_map = {
         "ade_classification": {
             "path": os.path.join(base_dir, "..", "data_sets", "ade_corpus_dataset", "ade_corpus_classification.csv"),
             "target_names": ["not-related", "related"],
         },
         "psytar_classification": {
-            "path": os.path.join(base_dir, "..", "data_sets", "psytar_dataset", "psytar_classification.csv"),
+            "path": os.path.join(base_dir, "..", "data_sets", "psytar_dataset", "PsyTAR_dataset.xlsx"),
             "target_names": ["not-related", "related"],
         },
     }
 
-    if dataset_name not in dataset_map:
-        raise ValueError(f"Unsupported dataset: {dataset_name}")
-
-    # Load dataset
     data_info = dataset_map[dataset_name]
-    df = pd.read_csv(data_info["path"])
+    if args.dataset == 'psytar':
+        df = pd.read_excel(data_info["path"], 3)
+        df = df.sample(n=args.numsamples, random_state=42).reset_index(drop=True)
+        texts = [ str(x) for x in df["sentences"].tolist()]
+        labels = [1 if x==1.0 else 0 for x in df["ADR"].tolist()]
+    else:
+        df = pd.read_csv(data_info["path"])
+        df = df.sample(n=args.numsamples, random_state=42).reset_index(drop=True)
+        texts = df["text"].tolist()
+        labels = df["label"].tolist()
 
-    texts = df["text"].tolist()
-    labels = df["label"].tolist()
+
+    
     target_names = data_info["target_names"]
 
-    tokenizer = get_tokenizer(model_type="classification")  # Load tokenizer
+    if args.dataset == "psytar":
+        tokenizer = get_tokenizer_psytar(model_type="classification")
+    else:
+        tokenizer = get_tokenizer_ade(model_type="classification")
 
-    # Grid of hyperparameter combinations to test
+
     param_grid = [
         {"learning_rate": 5e-5, "weight_decay": 0.01, "batch_size": 8},
         {"learning_rate": 3e-5, "weight_decay": 0.01, "batch_size": 16},
@@ -169,20 +197,19 @@ def main(dataset_name="psytar_classification"):
             )
 
     # Save all results to JSON and CSV
-    with open("./metrics/all_results.json", "w") as f:
+    with open("./metrics_classification/{dataset_name}/all_results.json", "w") as f:
         json.dump(all_results, f, indent=4)
 
     df_results = pd.DataFrame(all_results)
-    df_results.to_csv("./metrics/all_results.csv", index=False)
+    df_results.to_csv("./metrics_classification/{dataset_name}/all_results.csv", index=False)
 
 
 if __name__ == "__main__":
-    print(">>> Starting training for classification on ADE_corpus...")
 
     try:
-        main("ade_classification")
-        print(">>> Training correctly completed ✅")
+        main()
+        print(">>> Training was completed correctly")
     except Exception as e:
-        print(">>> An error occurred during the training ❌")
+        print(">>> Error during training")
         print(e)
 

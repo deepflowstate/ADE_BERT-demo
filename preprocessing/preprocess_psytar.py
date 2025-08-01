@@ -1,18 +1,18 @@
 import os
 from typing import List, Dict
 from .tokenizer_utils import tokenize_for_model, label_map, get_tokenizer
-# Import utility functions for tokenization, label mapping, and tokenizer loading
 
 def read_conll_file(file_path: str) -> List[Dict]:
     """
-    Reads a file in CoNLL format and converts it into a list of examples with tokens and ner_tags.
+        Reads a file in CoNLL format and converts it into a list of examples with tokens and ner_tags.
 
-    Args:
-        file_path (str): path to the .conll file
+        Args:
+            file_path (str): path to the .conll file
 
-    Returns:
-        List[Dict]: list of examples, each example is a dict {"tokens": [...], "ner_tags": [...]}
+        Returns:
+            List[Dict]: list of examples, each example is a dict {"tokens": [...], "ner_tags": [...]}
     """
+
     examples = []
     tokens = []
     labels = []
@@ -60,7 +60,7 @@ def preprocess_psytar_conll(input_conll_path: str, tokenizer, max_len=128):
     """
     examples = read_conll_file(input_conll_path)  # Read raw examples from the file
     encodings = []
-
+    # Skip examples with empty tokens or labels (empty spans)
     for example in examples:
         if not example["tokens"] or not example["ner_tags"]:
             print(f"Skipping example due to empty tokens or labels: {example}")
@@ -71,7 +71,6 @@ def preprocess_psytar_conll(input_conll_path: str, tokenizer, max_len=128):
         encodings.append(tokenized)
     
     return encodings
-
 
 if __name__ == "__main__":
     tokenizer = get_tokenizer(model_type="ner")

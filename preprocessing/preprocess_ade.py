@@ -98,6 +98,7 @@ if __name__ == "__main__":
     print(f"Processed {len(data)} examples from the ADE dataset.")
     print(data[0])
     
+    # Basic check for output structure
     assert len(data) > 0, "No examples were processed!"
     first_example = data[0]
     required_keys = {"input_ids", "attention_mask", "labels"}
